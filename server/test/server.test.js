@@ -1,6 +1,6 @@
+const {app} = require('./../server');
 const expect = require('expect');
 const request  = require('supertest');
-const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 const {ObjectID} = require('mongodb');
 const todos = [{
@@ -8,7 +8,9 @@ const todos = [{
     text: 'First test todo'
 }, {
     _id: new ObjectID(),
-    text: 'Second test todo'
+    text: 'Second test todo',
+    completed: true,
+    completedAt: 333
 }] ;
 
 
@@ -133,4 +135,46 @@ describe('DELETE /todos/:id', () => {
         .expect(404)
         .end(done);
     });
+});
+
+describe('Patch /todos/:id', () => {
+    it('should update todo', (done) => { 
+        let hex = todos[0]._id.toHexString();
+        let body = 
+        request(app)
+        .patch(`/todos/${hex}`)
+        .send({
+            text: "update from test 2",
+            completed: true
+        })
+        .expect(200)
+        .expect( (res) => {
+            expect(res.body.todo.text).toBe("update from test 2");
+            expect(res.body.todo.completed).toBe(true);
+             expect(typeof res.body.todo.completedAt).toBe('number');
+        })
+        .end(done);
+
+
+    });
+    it('should clear completedAt when todo is not complete', (done) => { 
+        let hex = todos[1]._id.toHexString();
+        let body = 
+        request(app)
+        .patch(`/todos/${hex}`)
+        .send({
+            text: "update from test 2",
+            completed: false
+        })
+        .expect(200)
+        .expect( (res) => {
+            expect(res.body.todo.text).toBe("update from test 2");
+            expect(res.body.todo.completed).toBe(false);
+            // expect(res.body.todo.completedAt).toBeFalsy();
+        })
+        .end(done);
+
+
+    });
+
 });
