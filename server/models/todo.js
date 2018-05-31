@@ -14,7 +14,11 @@ let Todo = mongoose.model('Todo', {
     completedAt: {
         type: Number,
         default: null
-    }
+    },
+    _creator: {
+        required: true,
+        type: mongoose.Schema.Types.ObjectId
+    } 
 });
 
 module.exports = {
